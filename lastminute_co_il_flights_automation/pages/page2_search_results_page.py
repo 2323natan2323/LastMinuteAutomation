@@ -429,7 +429,7 @@ class SearchResultsPage(BasePage):
         print("✅ Outbound flight button clicked.")
 
         outbound_city = self._fallback_params.get("outbound_city_fallback_param")
-        print(f"ℹ️ Typing outbound city: {"outbound_city"}")
+        print(f"ℹ️ Typing outbound city: {outbound_city}")
         outbound_field = self._page.locator(self.OUTBOUND_FLIGHT_CITY_TITLE)
         outbound_field.click()
         outbound_field.press("Control+A")
