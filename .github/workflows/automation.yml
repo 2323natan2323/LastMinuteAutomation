@@ -25,5 +25,12 @@ jobs:
         pip install -r requirements.txt
         python -m playwright install
 
-    - name: Run tests
-      run: pytest
+    - name: Run tests with Allure
+      run: |
+        pytest --alluredir=allure-results
+
+    - name: Upload Allure results
+      uses: actions/upload-artifact@v3
+      with:
+        name: allure-results
+        path: allure-results
