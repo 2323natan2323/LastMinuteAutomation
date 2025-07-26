@@ -27,7 +27,7 @@ jobs:
           python -m playwright install
 
       - name: Run tests
-        working-directory: ./pythonPlaywrightCourse/automation/lastminute_automation
+        working-directory: lastminute_automation
         run: pytest --alluredir=allure-results
 
       - name: Upload Allure results
