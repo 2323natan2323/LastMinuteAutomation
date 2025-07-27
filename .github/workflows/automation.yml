@@ -33,8 +33,12 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
+      # 3.5 Add PYTHONPATH so imports work
+      - name: Set PYTHONPATH
+        run: |
+          echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
+
       # 4 Run pytest under xvfb, save Allure results
-  # xvfb-run pytest -m devRun --alluredir=allure-results
       - name: Test with pytest
         shell: bash
         run: |
@@ -72,4 +76,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir:  allure-history
+          publish_dir: allure-history
