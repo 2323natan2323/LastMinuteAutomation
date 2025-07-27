@@ -1,0 +1,151 @@
+🔐 Prompt detected: Please enter credentials
+✅ Password submitted.
+🎉 Login successful!
+✅ The site was loaded successfully!
+✅ The cookies message was closed successfully!
+✅ The flight tab was clicked successfully
+Set the trip direction to round-trip
+✅ The trip type dropdown found successfully!
+✅ Selected trip type option: Round trip
+✅ Selected trip type option: One way
+✅ Selected trip type option: Multi-city
+🔁 Returned to Round Trip as final selection.
+✅ Round trip option is selected.
+✅ The passenger dropdown was clicked successfully!
+✅ The passenger dropdown confirmation btn was clicked successfully!
+✅ The flight class dropdown was clicked successfully
+✅ Selected flight class option: Economy
+✅ The flight class dropdown was clicked successfully
+✅ Selected flight class option: Premium
+✅ The flight class dropdown was clicked successfully
+✅ Selected flight class option: Business
+✅ The flight class dropdown was clicked successfully
+✅ Selected flight class option: First
+✅ Economy class was chosen successfully!
+Selecting outbound flight
+✅ The outbound flight btn was clicked successfully!
+✅ 'תל אביב' found in outbound city title.
+Selecting inbound flight
+✅ The inbound flight btn was clicked successfully!
+Set outbound and inbound dates!!
+✅ Flight date picker element found!
+🕓 Current month title: דצמבר
+✅ The flight was chosen successfully!
+✅ The flight was chosen successfully!
+✅ Flight me flights btn was clicked successfully!
+✅ Flight dates were set successfully!
+🔁 Trying to reload search results or retry with alternate
+✅ The search result page was loaded successfully!
+✅ Show more airlines btn was clicked!
+✅ El Al filter checkbox was clicked successfully.
+✅ Clicked 'More flights' button (1/6)
+✅ Clicked 'More flights' button (2/6)
+✅ Clicked 'More flights' button (3/6)
+✅ Clicked 'More flights' button (4/6)
+✅ Clicked 'More flights' button (5/6)
+ℹ️ 'More flights' button not found or no longer visible – stopping at attempt 5.
+🌐 Current URL: https://test.lastminute.co.il/flights/results?route=2&fdate=22%2F12%2F25&tdate=29%2F12%2F25&dport=TLV&aport=ATH&padt=1&pyou=0&pchd=0&pinf=0&psnr=0&cls=1&dport2=ATH
+✈️ Choosing El Al flight...
+✅ Flight search results are visible.
+✅ El Al outbound flight found.
+✅ El Al inbound flight found.
+🟢 El Al round trip found! Booking now...
+🌐 Current URL: https://test.lastminute.co.il/flights/checkout?flightID=ae59402f-6c9f-45a0-9884-49d4b1ce83ec#step2
+✅ Flexi page loaded successfully.
+✅ Flexi ticket button is visible. Clicking now...
+📨 Navigating to contact details page...
+✅ Contact details page loaded successfully.
+✅ First name filled.
+✅ Last name filled.
+✅ Email filled.
+✅ Email confirmation filled.
+✅ Phone number filled.
+✅ Promotions checkbox selected.
+➡️ Proceeding to passenger details page.
+✍️ Filling passenger information...
+✅ Passenger first name filled.
+✅ Passenger last name filled.
+✅ Passenger birthday filled.
+✅ Gender dropdown clicked.
+✅ Male gender was selected!
+ℹ️ Passenger passport number field not found – skipping.
+ℹ️ Passport expiration field not found – skipping.
+ℹ️ Nationality dropdown not found – skipping.
+ℹ️ Passport issuing country dropdown not found – skipping.
+✅ Outbound baggage was successfully added.
+✅ Inbound baggage was successfully added.
+➡️ Clicked 'Continue', attempting to move to next page...
+🛑 Page scrolled up but did not advance – triggering recovery...
+📸 Screenshot saved to: C:\Users\Natan\Pictures\lastminute_automation\lastminute_flights_automation\screenshot_20250726_185042.png
+📝 Console log saved to: C:\Users\Natan\Pictures\lastminute_automation\lastminute_flights_automation\console_log_20250726_185042.txt
+🔄 Reloading page...
+📝 Contact page detected again – refilling form and retrying...
+✅ First name filled.
+✅ Last name filled.
+✅ Email filled.
+✅ Email confirmation filled.
+✅ Phone number filled.
+ℹ️ Promotions checkbox already selected.
+➡️ Proceeding to passenger details page.
+✅ Passenger page loaded automatically – skipping button click.
+⏳ Waiting for passenger fields to appear...
+✅ Passenger fields loaded.
+✍️ Filling passenger information...
+✅ Passenger first name filled.
+✅ Passenger last name filled.
+✅ Passenger birthday filled.
+✅ Gender dropdown clicked.
+✅ Male gender was selected!
+ℹ️ Passenger passport number field not found – skipping.
+ℹ️ Passport expiration field not found – skipping.
+ℹ️ Nationality dropdown not found – skipping.
+ℹ️ Passport issuing country dropdown not found – skipping.
+✅ Outbound baggage was successfully added.
+✅ Inbound baggage was successfully added.
+➡️ Clicked 'Continue', attempting to move to next page...
+✅ Successfully moved to the next page.
+✅ Clicked on 'Premium Flex service' button.
+✅ Clicked on 'Cancellation protection' button.
+✅ Clicked on 'Cancel for any reason' button.
+✅ Clicked on 'Baggage protection' button.
+➡️ Clicked on 'Continue' button to proceed.
+🌐 Current URL: https://test.lastminute.co.il/flights/checkout?orderToken=d789ca51-068e-492a-ba2f-aef324b9d5aa&flightID=178ee972-330b-4ddd-b857-5246630614a2#step4
+📝 Flight summary details text found:
+סיכום פרטי הטיסה
+✅ Contact full name matches: Test Prod
+✅ Contact phone number matches: 9720527491280
+✅ Contact email matches: natan@lastminute.co.il
+✅ Passenger full name matches: Natan Shor
+✅ Passenger gender matches: זכר
+✅ Passenger birthday matches: 23111999
+✅ 'Transaction Terms' button was clicked.
+📝 14 remarks were found.
+✅ Minimum of 8 remarks found.
+✅ 'Order Summary' button was clicked.
+✅ The service 'מזוודה לבטן המטוס' was found successfully.
+✅ The service 'כרטיס גמיש +' was found successfully.
+✅ The service 'חבילת שירות פרמיום מותאמת לעידן השינויים והביטולים' was found successfully.
+✅ The service 'להזמין בראש שקט' was found successfully.
+✅ The service 'מזוודה שאבדה יכולה להרוס נסיעה' was found successfully.
+✅ The service 'ביטול חופשה מכל סיבה' was found successfully.
+✅ Payments number dropdown was clicked.
+✅ Payment option 'app-number-of-payments .payments-pop-container .option-row:nth-child(9)' was selected.
+✅ Payments number dropdown was clicked.
+✅ Payment option 'app-number-of-payments .payments-pop-container .option-row:nth-child(6)' was selected.
+✅ Payments number dropdown was clicked.
+✅ Payment option 'app-number-of-payments .payments-pop-container .option-row:nth-child(1)' was selected.
+✅ First name was filled successfully.
+✅ Last name was filled successfully.
+✅ Email address was filled successfully.
+✅ Phone number was filled successfully.
+🧾 Flight summary section price: 443.09
+📌 Header strip price: 443.09
+💳 Payment section price: 443.09
+✅ All flight prices match successfully!
+✅ Agreement checkbox was clicked.
+💳 Pay button was clicked. Payment process initiated.
+✅ Credit card number was entered successfully!
+✅ Selected year 2040!
+✅ Selected month 10 (October)!
+✅ The CVV field was filled!
+✅ The credit card holder ID was filled successfully!

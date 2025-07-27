@@ -20,7 +20,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        working-directory: ./pythonPlaywrightCourse/automation/lastminute_automation
+        working-directory: lastminute_automation
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
@@ -34,4 +34,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: allure-results
-          path: pythonPlaywrightCourse/automation/lastminute_automation/allure-results
+          path: lastminute_automation/allure-results
