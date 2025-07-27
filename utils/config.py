@@ -1,4 +1,5 @@
 import configparser
+import os
 import sys
 
 
@@ -7,11 +8,11 @@ class ConfigReader:
     @staticmethod
     def read_config(section, key):
         root_dir = sys.path[0]
+        config_path = os.path.join(root_dir, 'config.ini')
 
         config = configparser.ConfigParser()
-        config.read(root_dir + '/lastminute_automation/config.ini')
+        config.read(config_path)
 
-        # Check that the Section & key exists
         if config.has_section(section) and config.has_option(section, key):
             return config[section][key]
         else:
