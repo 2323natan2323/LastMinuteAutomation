@@ -2,7 +2,4 @@ playwright
 pytest
 pytest-playwright
 allure-pytest
-pytest-order
 
-@pytest.mark.order(1)
-def test_
