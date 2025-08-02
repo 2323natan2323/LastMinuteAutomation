@@ -1,5 +1,8 @@
+import re
+
 from playwright.sync_api import Page
 from lastminute_co_il_flights_automation.pages.base_page import BasePage
+from lastminute_co_il_flights_automation.pages.page2_search_results_page import FlightData
 
 
 class FlightSummaryDetails(BasePage):
@@ -40,6 +43,24 @@ class FlightSummaryDetails(BasePage):
     CREDIT_CARD_EXPIRED_MONTH_DROPDOWN = "app-payment-form #expMonth"
     CREDIT_CARD_CVV = "app-payment-form #cvv"
     CREDIT_CARD_ID_HOLDER = "app-payment-form #personal-id"
+
+    SUMMARY_FLIGHT_OUTBOUND_DEPARTURE_TIME = "app-flight-summary:nth-child(2) .destination-box:nth-child(1) .time"
+    SUMMARY_FLIGHT_OUTBOUND_DEPARTURE_IATA_ORIGIN = "app-flight-summary:nth-child(2) .destination-box:nth-child(1) .destination"
+    SUMMARY_FLIGHT_OUTBOUND_DEPARTURE_DATE = "app-flight-summary:nth-child(2) .destination-box:nth-child(1) .date"
+    SUMMARY_FLIGHT_OUTBOUND_DURATION = "app-flight-summary:nth-child(2) .flight-details .time"
+
+    SUMMARY_FLIGHT_OUTBOUND_LANDING_TIME = "app-flight-summary:nth-child(2) .destination-box:nth-child(3) .time"
+    SUMMARY_FLIGHT_OUTBOUND_LANDING_DATE = "app-flight-summary:nth-child(2) .destination-box:nth-child(3) .date"
+    SUMMARY_FLIGHT_OUTBOUND_LANDING_IATA_DESTINATION = "app-flight-summary:nth-child(2) .destination-box:nth-child(3) .destination"
+
+    SUMMARY_FLIGHT_INBOUND_DEPARTURE_TIME = "app-flight-summary:nth-child(3) .destination-box:nth-child(1) .time"
+    SUMMARY_FLIGHT_INBOUND_DEPARTURE_DATE = "app-flight-summary:nth-child(3) .destination-box:nth-child(1) .date"
+    SUMMARY_FLIGHT_INBOUND_DEPARTURE_IATA_ORIGIN = "app-flight-summary:nth-child(3) .destination-box:nth-child(1) .destination"
+    SUMMARY_FLIGHT_INBOUND_DURATION = "app-flight-summary:nth-child(3) .flight-details .time"
+
+    SUMMARY_FLIGHT_INBOUND_LANDING_TIME = "app-flight-summary:nth-child(3) .destination-box:nth-child(3) .time"
+    SUMMARY_FLIGHT_INBOUND_LANDING_DATE = "app-flight-summary:nth-child(3) .destination-box:nth-child(3) .date"
+    SUMMARY_FLIGHT_INBOUND_LANDING_IATA_DESTINATION = "app-flight-summary:nth-child(3) .destination-box:nth-child(3) .destination"
 
     def wait_for_summary_page_to_load(self):
         self._page.wait_for_load_state("load")
@@ -220,6 +241,60 @@ class FlightSummaryDetails(BasePage):
         )
 
         print("✅ All flight prices match successfully!")
+
+    @staticmethod
+    def normalize_date_text(text):
+        normalized_text = re.sub(r"(\d{2}/\d{2})(?=\S)", r"\1 ", text)
+        normalized_text = re.sub(r"יום([א-ת])", r"יום \1", normalized_text)
+        return normalized_text.strip()
+
+
+    def assert_flight_details_match(self, expected_data: FlightData):
+        print("🔍 Verifying flight details match on summary page...")
+
+        checks = [
+            (self.SUMMARY_FLIGHT_OUTBOUND_DEPARTURE_TIME, expected_data.outbound_departure_time,
+             "Outbound departure time"),
+            (self.SUMMARY_FLIGHT_OUTBOUND_DEPARTURE_DATE, expected_data.outbound_departure_date,
+             "Outbound departure date"),
+            (self.SUMMARY_FLIGHT_OUTBOUND_DEPARTURE_IATA_ORIGIN, expected_data.outbound_departure_iata_origin,
+             "Outbound IATA origin"),
+
+            (self.SUMMARY_FLIGHT_OUTBOUND_LANDING_TIME, expected_data.outbound_landing_time, "Outbound landing time"),
+            (self.SUMMARY_FLIGHT_OUTBOUND_LANDING_DATE, expected_data.outbound_landing_date, "Outbound landing date"),
+            (self.SUMMARY_FLIGHT_OUTBOUND_LANDING_IATA_DESTINATION, expected_data.outbound_landing_iata_destination,
+             "Outbound IATA destination"),
+
+            (self.SUMMARY_FLIGHT_OUTBOUND_DURATION, expected_data.outbound_duration_time, "Outbound duration"),
+
+            (self.SUMMARY_FLIGHT_INBOUND_DEPARTURE_TIME, expected_data.inbound_departure_time,
+             "Inbound departure time"),
+            (self.SUMMARY_FLIGHT_INBOUND_DEPARTURE_DATE, expected_data.inbound_departure_date,
+             "Inbound departure date"),
+            (self.SUMMARY_FLIGHT_INBOUND_DEPARTURE_IATA_ORIGIN, expected_data.inbound_departure_iata_origin,
+             "Inbound IATA origin"),
+
+            (self.SUMMARY_FLIGHT_INBOUND_LANDING_TIME, expected_data.inbound_landing_time, "Inbound landing time"),
+            (self.SUMMARY_FLIGHT_INBOUND_LANDING_DATE, expected_data.inbound_landing_date, "Inbound landing date"),
+            (self.SUMMARY_FLIGHT_INBOUND_LANDING_IATA_DESTINATION, expected_data.inbound_landing_iata_destination,
+             "Inbound IATA destination"),
+
+            (self.SUMMARY_FLIGHT_INBOUND_DURATION, expected_data.inbound_duration_time, "Inbound duration"),
+        ]
+
+        for locator_str, expected_value, field_name in checks:
+            actual_value = self._page.locator(locator_str).inner_text().strip()
+            normalized_value = self.normalize_date_text(actual_value)
+
+            if expected_value not in normalized_value:
+                print(f"❌ {field_name} mismatch:")
+                print(f"   Expected: {expected_value}")
+                print(f"   Got     : {normalized_value}")
+                raise AssertionError(f"{field_name} mismatch.")
+
+            print(f"✅ {field_name} matched: {expected_value}")
+
+        print("✅✅ All flight details match expected data.")
 
     def agree_and_pay(self):
         self._page.wait_for_timeout(3000)

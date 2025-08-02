@@ -37,7 +37,7 @@ class TestFlightBooking(BaseTest):
         self.home.set_passenger_type_and_count()
         self.home.set_flight_class()
         self.home.choose_outbound_flight("תל אביב")
-        self.home.choose_inbound_flight("אתונה")
+        self.home.choose_inbound_flight("וינה")
         self.home.set_flight_dates("22", "29")
 
         # 3. Search Page
@@ -69,23 +69,35 @@ class TestFlightBooking(BaseTest):
         if not success:
             raise Exception("❌ No valid flight dates found, aborting test.")
 
-        self.search.check_elal_airline_filter()
+        self.search.check_el_al_airways_airline_filter()
         self.search.click_more_flight_button_up_to_six_times()
-        new_tab = self.flexi = self.search.choose_elal_flight()
+        new_tab = self.flexi = self.search.choose_el_al_airways_flight()
 
         # 4. Flexi Page
         self.flexi = FlexiPage(new_tab)
         self.flexi.wait_for_page_to_load()
+        assert self.flexi.save_outbound_baggage_status is not None, "Outbound baggage status was not saved!"
+        assert self.flexi.save_inbound_baggage_status is not None, "Inbound baggage status was not saved!"
+        assert self.flexi.save_outbound_trolley_status is not None, "Outbound trolley status was not saved!"
+        assert self.flexi.save_inbound_trolley_status is not None, "Inbound trolley status was not saved!"
         self.flexi.choose_flexi_ticket()
+        self.flexi.save_all_lugagge_info()
+
 
         # 5. Contact Page
-        self.contact = ContactPage(new_tab)
+        self.contact = ContactPage(
+            page = new_tab,
+            outbound_baggage_status = self.flexi.outbound_baggage_status,
+            inbound_baggage_status = self.flexi.inbound_baggage_status,
+            outbound_trolley_status = self.flexi.outbound_trolley_status,
+            inbound_trolley_status = self.flexi.inbound_trolley_status,
+            )
+
         self.contact.wait_for_contact_page_to_load()
         self.contact.fill_contact_info(contact_first_name, contact_last_name, email, email, phone_number)
         self.contact.fill_passenger_info(passenger_first, passenger_last, birthday)
         self.contact.fill_passport_and_nationality_fields(passport_number, passport_expiration_date)
-        self.contact.add_outbound_baggage()
-        self.contact.add_inbound_baggage()
+        self.contact.handle_luggage()
         self.contact.continue_to_next_page_with_recovery(
             contact_first_name, contact_last_name,
             passenger_first, passenger_last,

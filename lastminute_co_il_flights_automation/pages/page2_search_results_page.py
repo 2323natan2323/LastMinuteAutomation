@@ -4,11 +4,66 @@ from playwright.sync_api import TimeoutError as PlaywrightTimeout
 
 from lastminute_co_il_flights_automation.pages.base_page import BasePage
 
+class FlightData:
+    def __init__(self):
+        self.outbound_departure_time = None
+        self.outbound_departure_date = None
+        self.outbound_departure_iata_origin = None
+        self.outbound_landing_time = None
+        self.outbound_landing_date = None
+        self.outbound_landing_iata_destination = None
+        self.inbound_departure_time = None
+        self.inbound_departure_date = None
+        self.inbound_departure_iata_origin = None
+        self.inbound_landing_time = None
+        self.inbound_landing_date = None
+        self.inbound_landing_iata_destination = None
+        self.outbound_duration_time = None
+        self.inbound_duration_time = None
 
 class SearchResultsPage(BasePage):
     def __init__(self, page: Page):
         super().__init__(page)
         self._fallback_params = {}  # שלב 1: יצירת מקום לשמירת הפרמטרים
+        self.saved_flight_data = FlightData()
+
+    def save_el_al_airways_flight_details(self, segment):
+        outbound_locator = segment.locator(self.SEGMENT_OUTBOUND_FLIGHT_TEXT)
+        outbound_locator.wait_for(state="visible", timeout=10000)
+        outbound_airline_name = outbound_locator.inner_text().strip().lower().replace("\n", "").replace("\t",
+                                                                                                        "").replace(
+            "  ", " ")
+
+        inbound_locator = segment.locator(self.SEGMENT_INBOUND_FLIGHT_TEXT)
+        inbound_locator.wait_for(state="visible", timeout=10000)
+        inbound_airline_name = inbound_locator.inner_text().strip().lower().replace("\n", "").replace("\t", "").replace(
+            "  ", " ")
+
+        if "el al" in outbound_airline_name and "abcd" in inbound_airline_name:
+            self.saved_flight_data.outbound_departure_time = segment.locator(
+                self.FLIGHT_OUTBOUND_DEPARTURE_TIME).inner_text()
+            self.saved_flight_data.outbound_departure_date = segment.locator(
+                self.FLIGHT_OUTBOUND_DEPARTURE_DATE).inner_text()
+            self.saved_flight_data.outbound_departure_iata_origin = segment.locator(
+                self.FLIGHT_OUTBOUND_DEPARTURE_IATA_ORIGIN).inner_text()
+            self.saved_flight_data.outbound_landing_time = segment.locator(
+                self.FLIGHT_OUTBOUND_LANDING_TIME).inner_text()
+            self.saved_flight_data.outbound_landing_date = segment.locator(
+                self.FLIGHT_OUTBOUND_LANDING_DATE).inner_text()
+            self.saved_flight_data.outbound_landing_iata_destination = segment.locator(
+                self.FLIGHT_OUTBOUND_LANDING_IATA_DESTINATION).inner_text()
+            self.saved_flight_data.inbound_departure_time = segment.locator(
+                self.FLIGHT_INBOUND_DEPARTURE_TIME).inner_text()
+            self.saved_flight_data.inbound_departure_date = segment.locator(
+                self.FLIGHT_INBOUND_DEPARTURE_DATE).inner_text()
+            self.saved_flight_data.inbound_departure_iata_origin = segment.locator(
+                self.FLIGHT_INBOUND_DEPARTURE_IATA_ORIGIN).inner_text()
+            self.saved_flight_data.inbound_landing_time = segment.locator(self.FLIGHT_INBOUND_LANDING_TIME).inner_text()
+            self.saved_flight_data.inbound_landing_date = segment.locator(self.FLIGHT_INBOUND_LANDING_DATE).inner_text()
+            self.saved_flight_data.inbound_landing_iata_destination = segment.locator(
+                self.FLIGHT_INBOUND_LANDING_IATA_DESTINATION).inner_text()
+            self.saved_flight_data.outbound_duration_time = segment.locator(self.FLIGHT_OUTBOUND_DURATION).inner_text()
+            self.saved_flight_data.inbound_duration_time = segment.locator(self.FLIGHT_INBOUND_DURATION).inner_text()
 
     FLIGHT_CARD_LIST = ".results-page-body"
     SEARCH_RESULTS_VERIFY_ELEMENT = '.search-results-txt [key="Filter.SearchResults"]'
@@ -31,6 +86,24 @@ class SearchResultsPage(BasePage):
     ACTUAL_INBOUND_CITY = ".destinations-container app-flights-autocomplete:nth-child(2) .input-wrapper .option-item:nth-child(1) .main-text"
     SHOW_MORE_AIRLINES_BTN = "app-checkbox .show-more-btn"
     SHOW_MORE_FLIGHTS_BTN = ".card-wrapper .show-more-btn"
+
+    FLIGHT_OUTBOUND_DEPARTURE_TIME = ".flight-row:nth-child(1) .destination-box:nth-child(1) .time"
+    FLIGHT_OUTBOUND_DEPARTURE_DATE = ".flight-row:nth-child(1) .destination-box:nth-child(1) .date"
+    FLIGHT_OUTBOUND_DEPARTURE_IATA_ORIGIN = ".flight-row:nth-child(1) .destination-box:nth-child(1)  .destination"
+    FLIGHT_OUTBOUND_DURATION = ".flight-row:nth-child(1) .flight-details .time"
+
+    FLIGHT_OUTBOUND_LANDING_TIME = ".flight-row:nth-child(1) .destination-box:nth-child(3) .time"
+    FLIGHT_OUTBOUND_LANDING_DATE = ".flight-row:nth-child(1) .destination-box:nth-child(3) .date"
+    FLIGHT_OUTBOUND_LANDING_IATA_DESTINATION = ".flight-row:nth-child(1) .destination-box:nth-child(3)  .destination"
+    FLIGHT_INBOUND_DURATION = ".flight-row:nth-child(2) .flight-details .time"
+
+    FLIGHT_INBOUND_DEPARTURE_TIME = ".flight-row:nth-child(2) .destination-box:nth-child(1) .time"
+    FLIGHT_INBOUND_DEPARTURE_DATE = ".flight-row:nth-child(2) .destination-box:nth-child(1) .date"
+    FLIGHT_INBOUND_DEPARTURE_IATA_ORIGIN = ".flight-row:nth-child(2) .destination-box:nth-child(1)  .destination"
+
+    FLIGHT_INBOUND_LANDING_TIME = ".flight-row:nth-child(2) .destination-box:nth-child(3) .time"
+    FLIGHT_INBOUND_LANDING_DATE = ".flight-row:nth-child(2) .destination-box:nth-child(3) .date"
+    FLIGHT_INBOUND_LANDING_IATA_DESTINATION = ".flight-row:nth-child(2) .destination-box:nth-child(3) .destination"
 
     def set_fallback_params(self, params: dict):
         self._fallback_params = params  # שלב 2: קבלת הפרמטרים מקובץ הטסט
@@ -280,8 +353,6 @@ class SearchResultsPage(BasePage):
 
                 print(f"❌ Search results not found, trying to select alternative dates and destination {next_outbound_flight_4_date}-{next_inbound_flight_4_date}")
 
-
-
                 return self.alternative_flight_destination_and_dates_1()
 
         next_outbound_flight_4_date = self._fallback_params.get("outbound_flight_4_date", "?")
@@ -511,7 +582,7 @@ class SearchResultsPage(BasePage):
         print(f"❌ The alternative flight dates {outbound_flight_5_date}-{inbound_flight_5_date} are not available! There are no available flight!")
         raise AssertionError("❌ No available flight options found after all fallback attempts!")
 
-    def check_elal_airline_filter(self):
+    def check_el_al_airways_airline_filter(self):
 
         show_more_airlines_btn =  self._page.locator(self.SHOW_MORE_AIRLINES_BTN)
         show_more_airlines_btn.wait_for(state="visible", timeout=10000)
@@ -519,11 +590,11 @@ class SearchResultsPage(BasePage):
         self.click(show_more_airlines_btn)
         print("✅ Show more airlines btn was clicked!")
 
-        elal_checkbox = self._page.locator(self.ELAL_FILTER_CHECK)
-        assert elal_checkbox.is_visible(), "❌ El Al filter checkbox is not visible on the page!"
+        el_al_airways_checkbox = self._page.locator(self.ELAL_FILTER_CHECK)
+        assert el_al_airways_checkbox.is_visible(), "❌ el_al_airways_airlines filter checkbox is not visible on the page!"
 
-        self.click(elal_checkbox)
-        print("✅ El Al filter checkbox was clicked successfully.")
+        self.click(el_al_airways_checkbox)
+        print("✅ el_al_airways_airlines filter checkbox was clicked successfully.")
 
     def click_more_flight_button_up_to_six_times(self):
         show_more_flight_btn = self._page.locator(self.SHOW_MORE_FLIGHTS_BTN)
@@ -540,10 +611,14 @@ class SearchResultsPage(BasePage):
                 print(f"⚠️ Failed to click on attempt {i + 1}: {e}")
                 break
 
-    def choose_elal_flight(self):
+    def choose_el_al_airways_flight(self):
+        if not hasattr(self, "tried_fallbacks"):
+            self.tried_fallbacks = set()
+
         self._page.wait_for_timeout(5000)
         print("🌐 Current URL:", self._page.url)
-        print("✈️ Choosing El Al flight...")
+        print("✈️ Choosing el_al_airways flight...")
+
 
         flight_cards_list = self._page.locator(self.FLIGHT_CARD_LIST)
         flight_cards_list.wait_for(state="visible", timeout=10000)
@@ -564,19 +639,77 @@ class SearchResultsPage(BasePage):
             inbound_airline_name = elal_inbound_flight_text.inner_text().strip().lower()
 
             if "el al" in outbound_airline_name:
-                print("✅ El Al outbound flight found.")
+                print("✅ el_al_airways outbound flight found.")
             else:
-                print(f"❌ El Al outbound flight not found in flight #{i + 1}")
+                print(f"❌ el_al_airways outbound flight not found in flight #{i + 1}")
 
-            if "el al" in inbound_airline_name:
-                print("✅ El Al inbound flight found.")
+            if "abcd" in inbound_airline_name:
+                print("✅ el_al_airways inbound flight found.")
             else:
-                print(f"❌ El Al inbound flight not found in flight #{i + 1}")
+                print(f"❌ el_al_airways inbound flight not found in flight #{i + 1}")
 
-            if "el al" in outbound_airline_name and "el al" in inbound_airline_name:
+            if "el al" in outbound_airline_name and "abcd" in inbound_airline_name:
+                self.saved_flight_data.outbound_departure_time = segment.locator(
+                    self.FLIGHT_OUTBOUND_DEPARTURE_TIME).inner_text()
+                print("Outbound departure time:", self.saved_flight_data.outbound_departure_time)
+
+                self.saved_flight_data.outbound_departure_date = segment.locator(
+                    self.FLIGHT_OUTBOUND_DEPARTURE_DATE).inner_text().replace('\n', ' ').strip()
+                print("Outbound departure date:", self.saved_flight_data.outbound_departure_date)
+
+                self.saved_flight_data.outbound_departure_iata_origin = segment.locator(
+                    self.FLIGHT_OUTBOUND_DEPARTURE_IATA_ORIGIN).inner_text()
+                print("Flight outbound departure origin IATA:", self.saved_flight_data.outbound_departure_iata_origin)
+
+                self.saved_flight_data.outbound_landing_time = segment.locator(
+                    self.FLIGHT_OUTBOUND_LANDING_TIME).inner_text()
+                print("Outbound landing time:", self.saved_flight_data.outbound_landing_time)
+
+                self.saved_flight_data.outbound_landing_date = segment.locator(
+                    self.FLIGHT_OUTBOUND_LANDING_DATE).inner_text().replace('\n', ' ').strip()
+                print("Outbound landing date:", self.saved_flight_data.outbound_landing_date)
+
+                self.saved_flight_data.outbound_landing_iata_destination = segment.locator(
+                    self.FLIGHT_OUTBOUND_LANDING_IATA_DESTINATION).inner_text()
+                print("Flight outbound landing IATA destination:",
+                      self.saved_flight_data.outbound_landing_iata_destination)
+
+                self.saved_flight_data.inbound_departure_time = segment.locator(
+                    self.FLIGHT_INBOUND_DEPARTURE_TIME).inner_text()
+                print("Inbound departure time:", self.saved_flight_data.inbound_departure_time)
+
+                self.saved_flight_data.inbound_departure_date = segment.locator(
+                    self.FLIGHT_INBOUND_DEPARTURE_DATE).inner_text().replace('\n', ' ').strip()
+                print("Inbound departure date:", self.saved_flight_data.inbound_departure_date)
+
+                self.saved_flight_data.inbound_departure_iata_origin = segment.locator(
+                    self.FLIGHT_INBOUND_DEPARTURE_IATA_ORIGIN).inner_text()
+                print("Flight inbound departure origin IATA:", self.saved_flight_data.inbound_departure_iata_origin)
+
+                self.saved_flight_data.inbound_landing_time = segment.locator(
+                    self.FLIGHT_INBOUND_LANDING_TIME).inner_text()
+                print("Inbound landing time:", self.saved_flight_data.inbound_landing_time)
+
+                self.saved_flight_data.inbound_landing_date = segment.locator(
+                    self.FLIGHT_INBOUND_LANDING_DATE).inner_text().replace('\n', ' ').strip()
+                print("Inbound landing date:", self.saved_flight_data.inbound_landing_date)
+
+                self.saved_flight_data.inbound_landing_iata_destination = segment.locator(
+                    self.FLIGHT_INBOUND_LANDING_IATA_DESTINATION).inner_text()
+                print("Flight inbound landing IATA destination:",
+                      self.saved_flight_data.inbound_landing_iata_destination)
+
+                self.saved_flight_data.outbound_duration_time = segment.locator(
+                    self.FLIGHT_OUTBOUND_DURATION).inner_text().replace('\n', ' ').strip()
+                print("Flight outbound duration time:", self.saved_flight_data.outbound_duration_time)
+
+                self.saved_flight_data.inbound_duration_time = segment.locator(
+                    self.FLIGHT_INBOUND_DURATION).inner_text().replace('\n', ' ').strip()
+                print("Flight inbound duration time:", self.saved_flight_data.inbound_duration_time)
+
                 order_flight_btn = segment.locator(self.ORDER_FLIGHT_BTN)
                 order_flight_btn.wait_for(state="attached", timeout=10000)
-                print("🟢 El Al round trip found! Booking now...")
+                print("🟢 el_al_airways_airlines round trip found! Booking now...")
 
 
                 with self._page.context.expect_page() as flexi_page_info:
@@ -586,23 +719,41 @@ class SearchResultsPage(BasePage):
                 flexi_page.wait_for_load_state()
                 return flexi_page
 
-        print("🔁 No El Al flight found — trying alternative dates (1)...")
-        if self.alternative_flight_dates_1():
-            self.check_elal_airline_filter()
+        print("🔁 No el_al_airways flight found — trying alternative dates (1)...")
+        if "dates1" not in self.tried_fallbacks and self.alternative_flight_dates_1():
+            self.tried_fallbacks.add("dates1")
+            self.check_el_al_airways_airline_filter()
             self.click_more_flight_button_up_to_six_times()
-            self.choose_elal_flight()
+            return self.choose_el_al_airways_flight()
 
         print("🔁 Trying alternative dates (2)...")
-        if self.alternative_flight_dates_2():
-            self.check_elal_airline_filter()
+        if "dates2" not in self.tried_fallbacks and self.alternative_flight_dates_2():
+            self.tried_fallbacks.add("dates2")
+            self.check_el_al_airways_airline_filter()
             self.click_more_flight_button_up_to_six_times()
-            self.choose_elal_flight()
+            return self.choose_el_al_airways_flight()
 
         print("🔁 Trying alternative dates (3)...")
-        if self.alternative_flight_dates_3():
-            self.check_elal_airline_filter()
+        if "dates3" not in self.tried_fallbacks and self.alternative_flight_dates_3():
+            self.tried_fallbacks.add("dates3")
+            self.check_el_al_airways_airline_filter()
             self.click_more_flight_button_up_to_six_times()
-            self.choose_elal_flight()
+            return self.choose_el_al_airways_flight()
 
-        raise AssertionError("❌ No round trip El Al flight was found in the available search results.")
+        print("🔁 Trying alternative destination and dates (4)...")
+        if "dest1" not in self.tried_fallbacks and self.alternative_flight_destination_and_dates_1():
+            self.tried_fallbacks.add("dest1")
+            self.check_el_al_airways_airline_filter()
+            self.click_more_flight_button_up_to_six_times()
+            return self.choose_el_al_airways_flight()
+
+        print("🔁 Trying alternative destination and dates (5)...")
+        if "dest2" not in self.tried_fallbacks and self.alternative_flight_destination_and_dates_2():
+            self.tried_fallbacks.add("dest2")
+            self.check_el_al_airways_airline_filter()
+            self.click_more_flight_button_up_to_six_times()
+            return self.choose_el_al_airways_flight()
+
+        raise AssertionError("❌ No round trip el_al_airways_airlines flight was found in the available search results.")
+
 

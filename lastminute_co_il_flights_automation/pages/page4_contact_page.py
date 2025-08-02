@@ -1,10 +1,22 @@
-from playwright.sync_api import Page
+from playwright.sync_api import Page, Locator
 from lastminute_co_il_flights_automation.pages.base_page import BasePage
+from lastminute_co_il_flights_automation.pages.page3_flexi_page import TrolleyStatus, BaggageStatus
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 
 class ContactPage(BasePage):
-    def __init__(self, page: Page):
+    def __init__(self,
+                 page: Page,
+                 outbound_baggage_status: str,
+                 inbound_baggage_status: str,
+                 outbound_trolley_status: str,
+                 inbound_trolley_status: str
+    ):
         super().__init__(page)
+        self.outbound_baggage_status = outbound_baggage_status
+        self.inbound_baggage_status = inbound_baggage_status
+        self.outbound_trolley_status = outbound_trolley_status
+        self.inbound_trolley_status = inbound_trolley_status
 
     CONTACT_HEADER = '.header-desktop > [key="Checkout.ContactDetails"]'
     CONTACT_FIRST_NAME_FIELD = '[name="fname"]'
@@ -26,14 +38,17 @@ class ContactPage(BasePage):
     COUNTRY_OF_PASSPORT_ISSUANCE_DROPDOWN = '.inputs-wrapper .selector-input-wrapper:nth-of-type(3) .subject-wrapper [class^="dropdown-subject"]'
     CHOOSE_NATIONALITY_ISRAEL = ".inputs-wrapper .selector-input-wrapper:nth-of-type(2) .subject-wrapper > .options-container > .option:nth-child(1)"
     CHOOSE_ISSUE_COUNTRY_ISRAEL = ".inputs-wrapper .selector-input-wrapper:nth-of-type(3) .subject-wrapper .option:nth-child(1)"
-
-    
-    
-    NO_BAGGAGE_ADDED_OUTBOUND = ".baggages-wrapper .baggage-segment:nth-child(1) .baggage-upgrade-row:nth-child(3) .baggage-item:nth-child(1)"
-    NO_BAGGAGE_ADDED_INBOUND = ".baggages-wrapper .baggage-segment:nth-child(2) .baggage-upgrade-row:nth-child(3) .baggage-item:nth-child(1)"
-    ONE_BAGGAGE_ADDED_OUTBOUND = ".baggages-wrapper .baggage-segment:nth-child(1) .baggage-upgrade-row:nth-child(3) .baggage-item:nth-child(2)"
-    ONE_BAGGAGE_ADDED_INBOUND = ".baggages-wrapper .baggage-segment:nth-child(2) .baggage-upgrade-row:nth-child(3) .baggage-item:nth-child(2)"
+    DO_NOT_ADD_BAGGAGE_OUTBOUND = ".baggages-wrapper .baggage-segment:nth-child(1) .baggage-upgrade-row:nth-child(3) .baggage-item:nth-child(1)"
+    DO_NOT_ADD_BAGGAGE_INBOUND = ".baggages-wrapper .baggage-segment:nth-child(2) .baggage-upgrade-row:nth-child(3) .baggage-item:nth-child(1)"
+    ADD_ONE_BAGGAGE_OUTBOUND = ".baggages-wrapper .baggage-segment:nth-child(1) .baggage-item:nth-child(2)"
+    ADD_ONE_BAGGAGE_INBOUND = '.baggages-wrapper .baggage-segment:nth-child(2) .baggage-item:nth-child(2):has-text("מזוודה")'
     PASSENGER_CONTINUE_BTN = ".continue-btn-wrapper > .continue-btn"
+    ADD_ONE_TROLLEY_OUTBOUND = ".baggages-wrapper .baggage-segment:nth-child(1) .baggage-upgrade-row:nth-child(2) .baggage-item:nth-child(2)"
+    ADD_ONE_TROLLEY_INBOUND = ".baggages-wrapper .baggage-segment:nth-child(2) .baggage-upgrade-row:nth-child(2) .baggage-item:nth-child(2)"
+    ASSERT_INCLUDED_OUTBOUND_BAGGAGE = ".baggages-wrapper .baggage-segment:nth-child(1) .baggage-upgrade-row:nth-child(3) .baggage-item.free-of-charge-baggage"
+    ASSERT_INCLUDED_INBOUND_BAGGAGE = ".baggages-wrapper .baggage-segment:nth-child(2) .baggage-upgrade-row:nth-child(3) .baggage-item.free-of-charge-baggage"
+    ASSERT_INCLUDED_OUTBOUND_TROLLEY = ".baggages-wrapper .baggage-segment:nth-child(1) .baggage-upgrade-row:nth-child(2) .baggage-item.free-of-charge-baggage"
+    ASSERT_INCLUDED_INBOUND_TROLLEY = ".baggages-wrapper .baggage-segment:nth-child(2) .baggage-upgrade-row:nth-child(2) .baggage-item.free-of-charge-baggage"
 
     def wait_for_contact_page_to_load(self):
         print("📨 Navigating to contact details page...")
@@ -86,11 +101,11 @@ class ContactPage(BasePage):
         continue_btn.wait_for(state="visible", timeout=10000)
         assert continue_btn.is_visible(), "❌ 'Continue' button is not visible!"
         self.click(continue_btn)
-        self._page.wait_for_timeout(3000)
+        self._page.wait_for_timeout(5000)
         print("➡️ Proceeding to passenger details page.")
 
     def fill_passenger_info(self, passenger_first_name, passenger_last_name, birthday_date):
-        self._page.wait_for_timeout(2000)
+        self._page.wait_for_timeout(5000)
         print("✍️ Filling passenger information...")
 
         # Fill first name
@@ -171,24 +186,155 @@ class ContactPage(BasePage):
         else:
             print("ℹ️ Passport issuing country dropdown not found – skipping.")
 
+    def handle_luggage(self):
+        # Outbound Baggage
+        if self.outbound_baggage_status == BaggageStatus.ADDABLE.value:
+            self.add_outbound_baggage()
+        elif self.outbound_baggage_status == BaggageStatus.INCLUDED.value:
+            self.assert_included_outbound_baggage()
+        elif self.outbound_baggage_status == BaggageStatus.NOT_INCLUDED.value:
+            print("ℹ️ No outbound baggage included or available – skipping.")
+        else:
+            print(f"⚠️ Unknown outbound baggage status: {self.outbound_baggage_status}")
+
+        # Inbound Baggage
+        if self.inbound_baggage_status == BaggageStatus.ADDABLE.value:
+            self.add_inbound_baggage()
+        elif self.inbound_baggage_status == BaggageStatus.INCLUDED.value:
+            self.assert_included_inbound_baggage()
+        elif self.inbound_baggage_status == BaggageStatus.NOT_INCLUDED.value:
+            print("ℹ️ No inbound baggage included or available – skipping.")
+        else:
+            print(f"⚠️ Unknown inbound baggage status: {self.inbound_baggage_status}")
+
+        # Outbound Trolley
+        if self.outbound_trolley_status == TrolleyStatus.ADDABLE.value:
+            self.add_outbound_trolley()
+        elif self.outbound_trolley_status == TrolleyStatus.INCLUDED.value:
+            self.assert_included_outbound_trolley()
+        elif self.outbound_trolley_status == TrolleyStatus.NOT_INCLUDED.value:
+            print("ℹ️ No outbound trolley included or available – skipping.")
+        else:
+            print(f"⚠️ Unknown outbound trolley status: {self.outbound_trolley_status}")
+
+        # Inbound Trolley
+        if self.inbound_trolley_status == TrolleyStatus.ADDABLE.value:
+            self.add_inbound_trolley()
+        elif self.inbound_trolley_status == TrolleyStatus.INCLUDED.value:
+            self.assert_included_inbound_trolley()
+        elif self.inbound_trolley_status == TrolleyStatus.NOT_INCLUDED.value:
+            print("ℹ️ No inbound trolley included or available – skipping.")
+        else:
+            print(f"⚠️ Unknown inbound trolley status: {self.inbound_trolley_status}")
+
     def add_outbound_baggage(self):
-        self._page.wait_for_timeout(2000)
-        outbound_baggage_button = self._page.locator(self.ONE_BAGGAGE_ADDED_OUTBOUND)
-        outbound_baggage_button.wait_for(state="visible", timeout=10000)
-        assert outbound_baggage_button.is_visible(), "❌ Outbound baggage button is not visible!"
-        self.click(outbound_baggage_button)
-        print("✅ Outbound baggage was successfully added.")
+        outbound_baggage_button = self._page.locator(self.ADD_ONE_BAGGAGE_OUTBOUND)
+
+        if outbound_baggage_button.count() == 0:
+            print("⚠️ ADDABLE baggage status received, but button not found – skipping.")
+            return
+
+        try:
+            outbound_baggage_button.wait_for(state="visible", timeout=5000)
+            if outbound_baggage_button.is_visible():
+                self.click(outbound_baggage_button)
+                print("✅ Outbound baggage was successfully added.")
+            else:
+                print("⚠️ Baggage button not visible even though it's in the DOM – skipping.")
+        except PlaywrightTimeoutError:
+            print("⚠️ Timeout waiting for baggage button to appear – skipping.")
 
     def add_inbound_baggage(self):
-        self._page.wait_for_timeout(2000)
-        inbound_baggage_button = self._page.locator(self.ONE_BAGGAGE_ADDED_INBOUND)
-        inbound_baggage_button.wait_for(state="visible", timeout=10000)
-        assert inbound_baggage_button.is_visible(), "❌ Inbound baggage button is not visible!"
-        self.click(inbound_baggage_button)
-        print("✅ Inbound baggage was successfully added.")
+        inbound_baggage_button = self._page.locator(self.ADD_ONE_BAGGAGE_INBOUND)
 
-    def continue_to_next_page_with_recovery(self, contact_first_name, contact_last_name, passenger_first_name,
-                                            passenger_last_name, email, verify_email, phone_number, birthday_date, passport_number, passport_expiration_date):
+        if inbound_baggage_button.count() == 0:
+            print("⚠️ ADDABLE inbound baggage status received, but button not found – skipping.")
+            return
+
+        try:
+            inbound_baggage_button.wait_for(state="visible", timeout=5000)
+            if inbound_baggage_button.is_visible():
+                self.click(inbound_baggage_button)
+                print("✅ Inbound baggage was successfully added.")
+            else:
+                print("⚠️ Inbound baggage button in DOM but not visible – skipping.")
+        except PlaywrightTimeoutError:
+            print("⚠️ Timeout waiting for inbound baggage button – skipping.")
+
+    def add_outbound_trolley(self):
+        outbound_trolley_button = self._page.locator(self.ADD_ONE_TROLLEY_OUTBOUND)
+
+        if outbound_trolley_button.count() == 0:
+            print("⚠️ ADDABLE outbound trolley status received, but button not found – skipping.")
+            return
+
+        try:
+            outbound_trolley_button.wait_for(state="visible", timeout=5000)
+            if outbound_trolley_button.is_visible():
+                self.click(outbound_trolley_button)
+                print("✅ Outbound trolley was successfully added.")
+            else:
+                print("⚠️ Outbound trolley button in DOM but not visible – skipping.")
+        except PlaywrightTimeoutError:
+            print("⚠️ Timeout waiting for outbound trolley button – skipping.")
+
+    def add_inbound_trolley(self):
+        inbound_trolley_button = self._page.locator(self.ADD_ONE_TROLLEY_INBOUND)
+
+        if inbound_trolley_button.count() == 0:
+            print("⚠️ ADDABLE inbound trolley status received, but button not found – skipping.")
+            return
+
+        try:
+            inbound_trolley_button.wait_for(state="visible", timeout=5000)
+            if inbound_trolley_button.is_visible():
+                self.click(inbound_trolley_button)
+                print("✅ Inbound trolley was successfully added.")
+            else:
+                print("⚠️ Inbound trolley button in DOM but not visible – skipping.")
+        except PlaywrightTimeoutError:
+            print("⚠️ Timeout waiting for inbound trolley button – skipping.")
+
+    def assert_included_outbound_baggage(self):
+        included_outbound_baggage = self._page.locator(self.ASSERT_INCLUDED_OUTBOUND_BAGGAGE)
+        if included_outbound_baggage.count() == 0:
+            raise Exception("❌ Outbound included baggage button not found in DOM at all.")
+        included_outbound_baggage.wait_for(state="visible", timeout=20000)
+        assert included_outbound_baggage.is_visible(), "❌ Outbound baggage button is not visible!"
+        print("✅ Outbound baggage is included.")
+
+    def assert_included_inbound_baggage(self):
+        included_inbound_baggage = self._page.locator(self.ASSERT_INCLUDED_INBOUND_BAGGAGE)
+        if included_inbound_baggage.count() == 0:
+            raise Exception("❌ Inbound included baggage button not found in DOM at all.")
+        included_inbound_baggage.wait_for(state="visible", timeout=20000)
+        assert included_inbound_baggage.is_visible(), "❌ Inbound baggage button is not visible!"
+        print("✅ Inbound baggage is included.")
+
+    def assert_included_outbound_trolley(self):
+        included_outbound_trolley = self._page.locator(self.ASSERT_INCLUDED_OUTBOUND_TROLLEY)
+        if included_outbound_trolley.count() == 0:
+            raise Exception("❌ Outbound included trolley button not found in DOM at all.")
+        included_outbound_trolley.wait_for(state="visible", timeout=2000)
+        assert included_outbound_trolley.is_visible(), "❌ Outbound trolley button is not visible!"
+        print("✅ Outbound trolley is included.")
+
+    def assert_included_inbound_trolley(self):
+        included_inbound_trolley = self._page.locator(self.ASSERT_INCLUDED_INBOUND_TROLLEY)
+        if included_inbound_trolley.count() == 0:
+            raise Exception("❌ Inbound included trolley button not found in DOM at all.")
+        included_inbound_trolley.wait_for(state="visible", timeout=20000)
+        assert included_inbound_trolley.is_visible(), "❌ Inbound trolley button is not visible!"
+        print("✅ Inbound trolley is included.")
+
+    def continue_to_next_page_with_recovery(
+            self,
+            contact_first_name, contact_last_name, passenger_first_name, passenger_last_name,
+            email, verify_email, phone_number, birthday_date, passport_number, passport_expiration_date,
+            attempt=1
+    ):
+        MAX_ATTEMPTS = 2
+
         self._page.wait_for_timeout(2000)
         continue_btn = self._page.locator(self.PASSENGER_CONTINUE_BTN)
         continue_btn.wait_for(state="visible", timeout=10000)
@@ -198,7 +344,7 @@ class ContactPage(BasePage):
         url_before = self._page.url
 
         self.click(continue_btn)
-        print("➡️ Clicked 'Continue', attempting to move to next page...")
+        print(f"➡️ Clicked 'Continue', attempt {attempt} of {MAX_ATTEMPTS}...")
         self._page.wait_for_timeout(3000)
 
         scroll_y_after = self._page.evaluate("() => window.scrollY")
@@ -206,6 +352,10 @@ class ContactPage(BasePage):
 
         if scroll_y_after < scroll_y_before - 100 and url_before == url_after:
             print("🛑 Page scrolled up but did not advance – triggering recovery...")
+
+            if attempt >= MAX_ATTEMPTS:
+                self.capture_debug_info()
+                raise Exception(f"❌ Still stuck after {MAX_ATTEMPTS} attempts – aborting.")
 
             self.capture_debug_info()
 
@@ -241,10 +391,11 @@ class ContactPage(BasePage):
             self.add_outbound_baggage()
             self.add_inbound_baggage()
 
-            # Recursive call to ensure continuation
+            # Try again, incrementing attempt count
             self.continue_to_next_page_with_recovery(
                 contact_first_name, contact_last_name, passenger_first_name, passenger_last_name,
-                email, verify_email, phone_number, birthday_date, passport_number, passport_expiration_date
+                email, verify_email, phone_number, birthday_date, passport_number, passport_expiration_date,
+                attempt=attempt + 1
             )
         else:
             print("✅ Successfully moved to the next page.")

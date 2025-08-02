@@ -6,6 +6,8 @@ def browser():
     playwright = sync_playwright().start()
     browser = playwright.chromium.launch(
         headless=False,
+
+
         args=[
             "--start-maximized",  # לפתוח במסך מלא
             "--disable-web-security",  # לבטל מגבלות אבטחה (למניעת חסימות)

@@ -55,7 +55,7 @@ class TestHomepageSearch(BaseTest):
         if not success:
             raise Exception("❌ No valid flight dates found, aborting test.")
 
-        self.search.check_elal_airline_filter()
+        self.search.check_el_al_airways_airline_filter()
         self.search.click_more_flight_button_up_to_six_times()
-        new_tab = self.search.choose_elal_flight()
+        new_tab = self.search.choose_el_al_airways_flight()
 
